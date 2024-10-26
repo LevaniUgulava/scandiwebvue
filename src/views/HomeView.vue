@@ -21,17 +21,20 @@
         <p>{{ decodeDetails(item.details) }}</p>
       </div>
     </div>
+    <p v-else>No products available.</p>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+
 export default {
   name: 'HomeView',
   data() {
     return {
       products: [],
-      selectedProducts: [], 
+      selectedProducts: [],
+      errors: null,
     };
   },
   methods: {
@@ -43,24 +46,32 @@ export default {
         const response = await axios.get('/display');
         this.products = response.data;
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching products:", error);
+        this.errors = "Failed to load products.";
       }
     },
     decodeDetails(details) {
+      if (!details) return "No details available";
       try {
         const parsedDetails = JSON.parse(details);
         return Object.entries(parsedDetails)
           .map(([key, value]) => `${key}: ${value}`)
-          .join(', ');
+          .join(", ");
       } catch (error) {
-        console.error('Error decoding details:', error);
-        return 'Invalid details';
+        console.error("Error decoding details:", error);
+        return "Invalid details";
       }
     },
     async massDelete() {
-      const response = await axios.post('/massdelete', { idarray: this.selectedProducts });
-      console.log(response);
-      this.getProduct();
+      try {
+        const response = await axios.post('/massdelete', { idarray: this.selectedProducts });
+        console.log("Mass delete response:", response.data);
+        this.selectedProducts = []; // Clear selected products after delete
+        this.getProduct(); // Refresh the product list
+      } catch (error) {
+        console.error("Error in mass delete:", error);
+        this.errors = "Failed to delete selected products.";
+      }
     },
   },
   mounted() {
@@ -91,17 +102,19 @@ export default {
 .card {
   display: flex;
   flex-direction: column;
-  margin-top: 50px;
+  margin-top: 20px;
   margin-left: 20px;
   border: solid black 1px;
   width: 20%;
+  padding: 10px;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .delete-checkbox {
-  margin-top: 5%;
-  margin-right: 80%;
+  margin-bottom: 10px;
+  cursor: pointer;
 }
 
 button {
@@ -116,5 +129,14 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.card-container p {
+  color: #333;
 }
 </style>
