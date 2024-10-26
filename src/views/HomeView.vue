@@ -43,15 +43,35 @@ export default {
       this.$router.push('/addproduct');
     },
     async getProduct() {
-  try {
-    const response = await axios.get('/api/display');
-    this.products = response.data;
-  } catch (error) {
-    console.error("Error fetching products:", error.message || error);
-    this.errors = `Failed to load products: ${error.message}`;
-  }
+      try {
+        // Perform the API request
+        const response = await axios.get('/api/display');
 
+        // Check for successful status
+        if (response.status < 200 || response.status >= 300) {
+          throw new Error(`Network response was not ok, status: ${response.status}`);
+        }
 
+        // Try to parse the JSON data
+        const responseData = response.data;
+        if (typeof responseData !== 'object') {
+          throw new Error("Received non-JSON response from server.");
+        }
+
+        // Assign the response data to products
+        this.products = responseData;
+        
+      } catch (error) {
+        // Display error messages based on the type of error
+        if (error.response) {
+          this.errors = `Failed to load products: ${error.response.statusText} (status: ${error.response.status})`;
+        } else if (error.message === "Received non-JSON response from server.") {
+          this.errors = "Error: Server response is not in JSON format.";
+        } else {
+          this.errors = `Error in API call: ${error.message}`;
+        }
+        console.error("Error fetching products:", error);
+      }
     },
     async massDelete() {
       try {
