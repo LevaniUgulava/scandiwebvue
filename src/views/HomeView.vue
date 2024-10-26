@@ -42,15 +42,14 @@ export default {
       this.$router.push('/addproduct');
     },
     async getProduct() {
-  try {
-    const response = await axios.get('/api/display'); // Calling the Vercel serverless function
-    console.log("Fetched data:", response.data);
-    this.products = response.data;
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    this.errors = "Failed to load products.";
-  },
-},
+      try {
+        const response = await axios.get('/api/display');
+        this.products = response.data;
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        this.errors = "Failed to load products.";
+      }
+    },
     decodeDetails(details) {
       if (!details) return "No details available";
       try {
