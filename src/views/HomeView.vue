@@ -18,7 +18,7 @@
         <p>{{ item.sku }}</p>
         <p>{{ item.name }}</p>
         <p>{{ item.price }}$</p>
-        <p>{{  decodeDetails(item.details) }}</p>
+        <p>{{ decodeDetails(item.details) }}</p>
       </div>
     </div>
   </div>
@@ -35,14 +35,13 @@ export default {
     };
   },
   methods: {
-     add() {
+    add() {
       this.$router.push('/addproduct');
     },
     async getProduct() {
       try {
-        const response = await axios.get('display');
+        const response = await axios.get('http://localhost:3000/display');
         this.products = response.data;
-         
       } catch (error) {
         console.log(error);
       }
@@ -58,9 +57,8 @@ export default {
         return 'Invalid details';
       }
     },
- 
     async massDelete() {
-      const response = await axios.post('massdelete',{idarray:this.selectedProducts});
+      const response = await axios.post('/massdelete', { idarray: this.selectedProducts });
       console.log(response);
       this.getProduct();
     },
@@ -105,6 +103,7 @@ export default {
   margin-top: 5%;
   margin-right: 80%;
 }
+
 button {
   cursor: pointer;
   padding: 8px 15px;
