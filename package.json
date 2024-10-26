@@ -31,6 +31,10 @@
     {
       "source": "/massdelete",
       "destination": "http://scandiweb12.000.pe/massdelete"
+    },
+    {
+      "source": "/create",
+      "destination": "http://scandiweb12.000.pe/create"
     }
   ]
 
