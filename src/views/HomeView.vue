@@ -40,7 +40,7 @@ export default {
     },
     async getProduct() {
       try {
-        const response = await axios.get('http://scandiweb12.000.pe/display');
+        const response = await axios.get('/api/getdata');
         this.products = response.data;
       } catch (error) {
         console.log(error);
