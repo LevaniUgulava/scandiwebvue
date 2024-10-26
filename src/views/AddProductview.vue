@@ -24,7 +24,7 @@
 
         <label>Product Type:</label>
         <select id="productType" v-model="selectedType" required>
-          <option value="1">select...</option>
+          <option value="1">Select...</option>
           <option value="Book">Book</option>
           <option value="Furniture">Furniture</option>
           <option value="DVD">DVD</option>
@@ -69,15 +69,15 @@ export default {
   data() {
     return {
       selectedType: 1,
-      inputsku:'',
-      inputname:'',
-      inputprice:'',
-      inputsize:'',
-      inputweight:'',
-      inputwidth:'',
-      inputheight:'',
-      inputlenght:'',
-      errors:{},
+      inputsku: '',
+      inputname: '',
+      inputprice: '',
+      inputsize: '',
+      inputweight: '',
+      inputwidth: '',
+      inputheight: '',
+      inputlenght: '',
+      errors: {},
     };
   },
   methods: {
@@ -85,52 +85,51 @@ export default {
       this.$router.push('/');
     },
 
-    async create(){
-       this.errors = {};
-          let details = {};
+    async create() {
+      this.errors = {};
+      let details = {};
 
-      try{
-         if (this.selectedType === 'DVD') {
-      details = {
-        size: this.inputsize,
-      };
-    } else if (this.selectedType === 'Book') {
-      details = {
-        weight: this.inputweight,
-      };
-    } else if (this.selectedType === 'Furniture') {
-      details = {
-        width: this.inputwidth,
-        height: this.inputheight,
-        length: this.inputlenght,
-      };
-    }  
-    
-    console.log({
-    sku: this.inputsku,
-    name: this.inputname,
-    price: this.inputprice,
-    type: this.selectedType,
-    details: details
-});
-        const response = await axios.post('/create',{
-          sku:this.inputsku,
-          name:this.inputname,
-          price:this.inputprice,
-          type:this.selectedType,
-          details:details
-          });
-          response
+      // Set details based on selected type
+      if (this.selectedType === 'DVD') {
+        details = { size: this.inputsize };
+      } else if (this.selectedType === 'Book') {
+        details = { weight: this.inputweight };
+      } else if (this.selectedType === 'Furniture') {
+        details = {
+          width: this.inputwidth,
+          height: this.inputheight,
+          length: this.inputlenght,
+        };
+      }
 
+      // Prepare product data
+      const productData = {
+        sku: this.inputsku,
+        name: this.inputname,
+        price: this.inputprice,
+        type: this.selectedType,
+        details: details,
+      };
 
-          this.cancel();
-      }catch(error){
-       if (error.response && error.response.status === 422) {
+      try {
+        // Send data to backend
+        const response = await axios.post('/api/create', productData);
+
+        if (response.data.success) {
+          this.cancel(); // Navigate back on success
+        } else {
+          this.errors.general = 'Failed to create product.';
+        }
+      } catch (error) {
+        // Handle validation errors from backend
+        if (error.response && error.response.status === 422) {
           this.errors = error.response.data.errors;
         } else {
           console.error('An error occurred:', error);
-        }      }
-    }
+          this.errors.general = 'An unexpected error occurred.';
+        }
+      }
+    },
   },
 };
 </script>
@@ -204,5 +203,11 @@ button:hover {
   border-radius: 5px;
   background-color: #f0f0f0;
   margin-top: 15px;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
 }
 </style>
