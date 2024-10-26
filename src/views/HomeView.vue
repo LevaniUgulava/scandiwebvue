@@ -7,6 +7,7 @@
         <button @click="massDelete">MASS DELETE</button>
       </div>
     </div>
+    <p v-if="errors" class="error-message">{{ errors }}</p>
     <div class="card-container" v-if="products.length > 0">
       <div class="card" v-for="item in products" :key="item.id">
         <input 
@@ -18,7 +19,7 @@
         <p>{{ item.sku }}</p>
         <p>{{ item.name }}</p>
         <p>{{ item.price }}$</p>
-        <p>{{ decodeDetails(item.details) }}</p>
+        <p>{{ item.details.weight }}</p>
       </div>
     </div>
     <p v-else>No products available.</p>
@@ -50,21 +51,9 @@ export default {
         this.errors = "Failed to load products.";
       }
     },
-    decodeDetails(details) {
-      if (!details) return "No details available";
-      try {
-        const parsedDetails = JSON.parse(details);
-        return Object.entries(parsedDetails)
-          .map(([key, value]) => `${key}: ${value}`)
-          .join(", ");
-      } catch (error) {
-        console.error("Error decoding details:", error);
-        return "Invalid details";
-      }
-    },
     async massDelete() {
       try {
-        const response = await axios.post('/massdelete', { idarray: this.selectedProducts });
+        const response = await axios.post('/api/massdelete', { idarray: this.selectedProducts });
         console.log("Mass delete response:", response.data);
         this.selectedProducts = []; // Clear selected products after delete
         this.getProduct(); // Refresh the product list
@@ -138,5 +127,11 @@ p {
 
 .card-container p {
   color: #333;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
 }
 </style>
