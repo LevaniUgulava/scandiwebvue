@@ -113,7 +113,7 @@ export default {
     type: this.selectedType,
     details: details
 });
-        const response = await axios.post('http://localhost:3000/create',{
+        const response = await axios.post('/create',{
           sku:this.inputsku,
           name:this.inputname,
           price:this.inputprice,
