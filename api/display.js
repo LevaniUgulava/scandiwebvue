@@ -4,25 +4,18 @@ export default async (req, res) => {
     try {
         const response = await fetch("http://scandiweb12.000.pe/display");
 
-        // Check if the response status is OK (200-299)
-        if (!response.ok) {
-            throw new Error(`Network response was not ok, status: ${response.status}`);
-        }
+        // Capture and log raw response text
+        const rawText = await response.text();
+        console.log("Raw response from server:", rawText);
 
-        // Attempt to parse the response as JSON
-        const responseData = await response.json().catch(e => {
-            console.error("Failed to parse JSON:", e);
-            throw new Error("Received non-JSON response from server.");
-        });
-
-        // Send the JSON data if parsing was successful
+        // Attempt JSON parsing
+        const responseData = JSON.parse(rawText);
         res.status(200).json(responseData);
 
     } catch (error) {
-        // Send a JSON error response if any error occurs
-        console.error("Error in /api/display function:", error.message || error);
+        console.error("Error processing JSON response:", error.message || error);
         res.status(500).json({
-            error: "Failed to fetch products",
+            error: "Failed to fetch data",
             details: error.message || "Unknown error occurred"
         });
     }
