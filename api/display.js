@@ -1,28 +1,35 @@
-import fetch from 'node-fetch';
+const puppeteer = require('puppeteer');
 
 export default async (req, res) => {
     try {
-        const response = await fetch("http://scandiweb12.000.pe/display");
+        // Launch Puppeteer
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'] // Required for Vercel or serverless environments
+        });
 
-        // Log raw response for troubleshooting
-        const rawText = await response.text();
-        console.log("Raw response from backend:", rawText);
+        const page = await browser.newPage();
 
-        // Parse the raw text if it's JSON, otherwise handle as error
-        let responseData;
-        try {
-            responseData = JSON.parse(rawText);
-        } catch (parseError) {
-            throw new Error("Server response is not valid JSON: " + rawText);
-        }
+        // Visit the target URL
+        await page.goto('http://scandiweb12.000.pe/display', {
+            waitUntil: 'networkidle2' // Wait until all network requests are done
+        });
 
+        // Extract JSON directly from the page
+        const rawText = await page.evaluate(() => document.body.innerText);
+
+        // Close Puppeteer
+        await browser.close();
+
+        // Parse and send the JSON response
+        const responseData = JSON.parse(rawText);
         res.status(200).json(responseData);
 
     } catch (error) {
-        console.error("Error in /api/display function:", error.message || error);
+        console.error("Error fetching data with Puppeteer:", error.message);
         res.status(500).json({
             error: "Failed to fetch data",
-            details: error.message || "Unknown error occurred"
+            details: error.message
         });
     }
 };
