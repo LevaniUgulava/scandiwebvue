@@ -1,8 +1,9 @@
-const chromium = require('@sparticuz/chrome-aws-lambda');
+const chromium = require('chrome-aws-lambda');
 const puppeteer = require('puppeteer-core');
 
 export default async (req, res) => {
     try {
+        // Launch Puppeteer with the serverless-friendly configuration
         const browser = await puppeteer.launch({
             args: chromium.args,
             executablePath: await chromium.executablePath,
@@ -11,15 +12,15 @@ export default async (req, res) => {
 
         const page = await browser.newPage();
 
-        // Navigate to the target page with bot protection
+        // Navigate to the target URL
         await page.goto('http://scandiweb12.000.pe/display', { waitUntil: 'networkidle2' });
 
-        // Extract the text content of the page (assuming it is JSON text)
+        // Extract the JSON content from the page (assuming the response is JSON text)
         const rawText = await page.evaluate(() => document.body.innerText);
 
         await browser.close();
 
-        // Parse and return the JSON data
+        // Parse and send the JSON response
         const responseData = JSON.parse(rawText);
         res.status(200).json(responseData);
 
