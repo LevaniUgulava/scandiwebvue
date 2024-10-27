@@ -1,24 +1,23 @@
-const puppeteer = require('puppeteer');
+const chromium = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer-core');
 
 export default async (req, res) => {
     try {
-        // Launch Puppeteer
+        // Launch Puppeteer with the serverless-friendly configuration
         const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'] // Required for Vercel or serverless environments
+            args: chromium.args,
+            executablePath: await chromium.executablePath,
+            headless: chromium.headless,
         });
 
         const page = await browser.newPage();
 
-        // Visit the target URL
-        await page.goto('http://scandiweb12.000.pe/display', {
-            waitUntil: 'networkidle2' // Wait until all network requests are done
-        });
+        // Navigate to the target URL
+        await page.goto('http://scandiweb12.000.pe/display', { waitUntil: 'networkidle2' });
 
-        // Extract JSON directly from the page
+        // Extract the JSON content from the page (assuming the response is JSON text)
         const rawText = await page.evaluate(() => document.body.innerText);
 
-        // Close Puppeteer
         await browser.close();
 
         // Parse and send the JSON response
@@ -26,10 +25,10 @@ export default async (req, res) => {
         res.status(200).json(responseData);
 
     } catch (error) {
-        console.error("Error fetching data with Puppeteer:", error.message);
+        console.error("Error in /api/display function with Puppeteer:", error.message || error);
         res.status(500).json({
             error: "Failed to fetch data",
-            details: error.message
+            details: error.message || "Unknown error occurred"
         });
     }
 };
